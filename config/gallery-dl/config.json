@@ -1,0 +1,63 @@
+{
+  "base-directory": "/home/ls/ls/manga",
+  "extractor": {
+    "danbooru": {
+      "directory": ["danbooru"],
+      "filename": "{id}.{extension}",
+      "skip": true
+    },
+    "gelbooru": {
+      "directory": ["gelbooru"],
+      "filename": "{id}.{extension}",
+      "skip": true
+    },
+    "e621": {
+      "directory": ["e621"],
+      "filename": "{id}.{extension}",
+      "skip": true
+    },
+    "ehentai": {
+      "directory": ["ehentai", "{gallery_id}"],
+      "filename": "{gallery_id}_{num:>02}.{extension}",
+      "skip": true,
+      "postprocessors": [
+        {
+          "name": "metadata",
+          "mode": "custom",
+          "event": "post-after",
+          "base-directory": "/home/ls/ls/manga/ehentai/",
+          "filename": "mangas.txt",
+          "content-format": "{title} - {gallery_id} - {count} imagens\n"
+        }
+      ]
+    },
+    "nhentai": {
+      "directory": ["nhentai", "{gallery_id}"],
+      "filename": "{gallery_id}_{num:>02}.{extension}",
+      "skip": true,
+      "postprocessors": [
+        {
+          "name": "metadata",
+          "mode": "custom",
+          "event": "post-after",
+          "base-directory": "/home/ls/ls/manga/nhentai/",
+          "filename": "mangas.txt",
+          "content-format": "{title} - {gallery_id} - {count} imagens\n"
+        }
+      ]
+    },
+    "generic": {
+      "directory": ["other"],
+      "filename": "{id}_{title}_{date:%Y-%m-%d}.{extension}",
+      "skip": true
+    }
+  },
+  "downloader": {
+    "retries": 3,
+    "timeout": 10.0
+  },
+  "output": {
+    "mode": "color",
+    "skip": true
+  }
+}

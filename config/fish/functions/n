@@ -1,0 +1,105 @@
+function n --description "Downloads a gallery, converts images to JPG, creates a CBZ archive and an image folder, and adds a manga.txt for nHentai, moving to /home/ls/ls/documents/mangas/"
+    # Checa argumento
+    if test -z "$argv[1]"
+        echo "Uso: n <url>"
+        return 1
+    end
+
+    # Checa dependências
+    if not command -q gallery-dl
+        echo "Erro: 'gallery-dl' não encontrado. Instale-o."
+        return 1
+    end
+    if not command -q convert
+        echo "Erro: 'convert' não encontrado. Instale o ImageMagick."
+        return 1
+    end
+    if not command -q zip
+        echo "Erro: 'zip' não encontrado. Instale-o."
+        return 1
+    end
+
+    set dest_final "/home/ls/ls/documents/mangas/" # <--- DIRETÓRIO ALTERADO AQUI
+
+    # Cria o diretório de destino final se não existir
+    if not test -d "$dest_final"
+        mkdir -p "$dest_final"
+    end
+
+    echo "Baixando galeria..."
+    # gallery-dl por padrão cria uma pasta no diretório atual.
+    # Capturamos o caminho do primeiro arquivo baixado para determinar o nome da pasta temporária.
+    set first_file (gallery-dl $argv[1] | string match -r '^./.*' | head -n 1)
+
+    if test -z "$first_file"
+        echo "Erro: Nenhum arquivo baixado ou erro ao determinar o diretório de download."
+        return 1
+    end
+
+    set dest_dir (dirname "$first_file") # Este é o diretório temporário criado por gallery-dl (ex: ./gallery_title)
+
+    if not test -d "$dest_dir"
+        echo "Erro: Não foi possível determinar o diretório de download: $dest_dir. Verifique a saída de gallery-dl."
+        return 1
+    end
+
+    # Conta arquivos baixados
+    set total_webp (count $dest_dir/*.webp 2>/dev/null)
+    set total_jpg (count $dest_dir/*.jpg 2>/dev/null)
+    set total_imgs (math $total_webp + $total_jpg)
+
+    echo "Download concluído. $total_imgs arquivos encontrados em: $dest_dir"
+    pushd "$dest_dir" >/dev/null # Entra no diretório temporário de download
+
+    # Renomeia e converte .webp para 01.jpg, 02.jpg, ...
+    set idx 1
+    for f in (ls *.webp | sort)
+        set new_name (printf "%02d.jpg" $idx)
+        convert $f $new_name 2>/dev/null
+        rm $f
+        set idx (math $idx + 1)
+    end
+
+    set jpg_count (count *.jpg)
+    echo "✅ $jpg_count/$jpg_count convertidos com sucesso"
+
+    set archive_name (basename (pwd)) # Será o nome da pasta da galeria (ex: "598204" ou "My Gallery Title")
+    set cbz_file "$archive_name.cbz"
+
+    echo "📦 Criando arquivo $cbz_file com $jpg_count imagens..."
+    zip -q "$cbz_file" *.jpg
+
+    # --- NOVO: Cria pasta com imagens no destino final ---
+    set image_folder_path "$dest_final/$archive_name"
+    echo "🖼️ Criando pasta de imagens em: $image_folder_path"
+    mkdir -p "$image_folder_path"
+
+    echo "🚚 Movendo imagens para a pasta de imagens..."
+    mv *.jpg "$image_folder_path/"
+
+    # --- NOVO: Cria manga.txt para nHentai ---
+    if string match -q "https://nhentai.net/g/*" "$argv[1]"
+        set nhentai_id (echo "$argv[1]" | sed -E 's/.*\/g\/([0-9]+)\/.*/\1/')
+        if test -n "$nhentai_id"
+            echo "📝 Criando $nhentai_id.txt em $image_folder_path"
+            echo "$nhentai_id" > "$image_folder_path/$nhentai_id.txt"
+        else
+            echo "Aviso: Não foi possível extrair o ID do nHentai da URL."
+        end
+    end
+
+    # Move o .cbz para a pasta final
+    echo "🚚 Movendo $cbz_file para $dest_final"
+    mv "$cbz_file" "$dest_final"
+
+    popd >/dev/null # Sai do diretório temporário de download
+
+    # Remove a pasta de download temporária (gallery-dl)
+    echo "🧹 Limpando arquivos temporários..."
+    rm -rf "$dest_dir"
+
+    echo "🎉 Sucesso! Arquivo CBZ e pasta de imagens criados e movidos para: $dest_final"
+    if command -q notify-send
+        notify-send "Download finalizado" "CBZ e pasta de imagens criados e movidos para $dest_final$archive_name/"
+    end
+end

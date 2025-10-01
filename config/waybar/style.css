@@ -1,0 +1,85 @@
+* {
+    font-family: "JetBrains Mono", "FiraCode Nerd Font", FontAwesome;
+    font-size: 12px; /* REDUZIDO de 15px para 12px */
+    color: rgba(255, 255, 255, 0.8);
+    transition:
+        color 0.25s ease,
+        background 0.25s ease,
+        border 0.25s ease;
+}
+
+#waybar {
+    background: rgba(30, 30, 30, 0.6);
+    border-radius: 14px;
+    padding: 6px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+#workspaces button {
+    padding: 0 6px;
+    margin: 0 2px;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.66);
+    font-size: 14px; /* REDUZIDO de 17px para 14px */
+    border-radius: 1000px;
+    transition:
+        color 0.25s ease,
+        background 0.25s ease;
+}
+
+#workspaces button.focused,
+#workspaces button.active {
+    background: #007aff;
+    color: #ffffff;
+    border: 1px solid #007aff;
+}
+
+#workspaces button:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 1);
+}
+
+#clock,
+#battery,
+#network,
+#pulseaudio,
+#tray,
+#backlight,
+#custom-links,
+#mpris {
+    padding: 2px 6px;
+    margin: 0 2px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    transition: all 0.25s ease;
+}
+
+#clock {
+    background: rgba(122, 162, 247, 0.15);
+    color: #94a2df;
+    font-size: 11px; /* REDUZIDO de 13px para 11px */
+    font-weight: 500;
+}
+
+#battery.warning {
+    color: #e0af68;
+}
+
+#battery.critical {
+    color: #f7768e;
+}
+
+#network.disconnected {
+    color: #f7768e;
+}
+
+#pulseaudio:hover,
+#backlight:hover,
+#custom-links:hover {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+#tray {
+    padding: 0 4px;
+}
